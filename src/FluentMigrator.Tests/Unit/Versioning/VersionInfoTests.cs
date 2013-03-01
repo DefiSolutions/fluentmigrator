@@ -17,6 +17,7 @@
 #endregion
 
 using System.Linq;
+using FluentMigrator.Infrastructure;
 using FluentMigrator.Runner.Versioning;
 using NUnit.Framework;
 using NUnit.Should;
@@ -28,7 +29,12 @@ namespace FluentMigrator.Tests.Unit.Versioning
 	{
 		private VersionInfo _versionInfo;
 
-		[SetUp]
+        private IMigrationInfo CreateMigrationFor(long version, string versionName = null)
+        {
+            return new MigrationInfo(version, versionName, TransactionBehavior.Default, new VersionMigration(null));
+        }
+
+	    [SetUp]
 		public void SetUp()
 		{
 			_versionInfo = new VersionInfo();			
@@ -37,23 +43,23 @@ namespace FluentMigrator.Tests.Unit.Versioning
 		[Test]
 		public void CanAddAppliedMigration()
 		{
-			_versionInfo.AddAppliedMigration(200909060953);
-			_versionInfo.HasAppliedMigration(200909060953).ShouldBeTrue();
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953));
+            _versionInfo.HasAppliedMigration(CreateMigrationFor(200909060953)).ShouldBeTrue();
 		}
 
 		[Test]
 		public void CanGetLatestMigration()
 		{
-			_versionInfo.AddAppliedMigration(200909060953);
-			_versionInfo.AddAppliedMigration(200909060935);
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953));
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060935));
 			_versionInfo.Latest().ShouldBe(200909060953);
 		}
 
 		[Test]
 		public void CanGetAppliedMigrationsLatestFirst()
 		{
-			_versionInfo.AddAppliedMigration(200909060953);
-			_versionInfo.AddAppliedMigration(200909060935);
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953));
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060935));
 			var applied = _versionInfo.AppliedMigrations().ToList();
 			applied[0].ShouldBe(200909060953);
 			applied[1].ShouldBe(200909060935);

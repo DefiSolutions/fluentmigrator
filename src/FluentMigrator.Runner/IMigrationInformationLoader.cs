@@ -29,7 +29,7 @@ namespace FluentMigrator.Runner
 {
     public interface IMigrationInformationLoader
     {
-        SortedList<long, IMigrationInfo> LoadMigrations();
+        List<IMigrationInfo> LoadMigrations();
     }
 
     public class DefaultMigrationInformationLoader : IMigrationInformationLoader
@@ -56,9 +56,10 @@ namespace FluentMigrator.Runner
         public bool LoadNestedNamespaces { get; private set; }
         public IEnumerable<string> TagsToMatch { get; private set; }
 
-        public SortedList<long, IMigrationInfo> LoadMigrations()
+        public List<IMigrationInfo> LoadMigrations()
         {
-            var migrationInfos = new SortedList<long, IMigrationInfo>();
+            var migrationInfos = new List<IMigrationInfo>();
+            var versions = new List<string>();
 
             IEnumerable<IMigration> migrationList = FindMigrations();
 
@@ -68,10 +69,12 @@ namespace FluentMigrator.Runner
             foreach (IMigration migration in migrationList)
             {
                 IMigrationInfo migrationInfo = Conventions.GetMigrationInfo(migration);
-                if (migrationInfos.ContainsKey(migrationInfo.Version))
+                if (versions.Contains(migrationInfo.ComplexVersion))
                     throw new DuplicateMigrationException(String.Format("Duplicate migration version {0}.",
-                                                                        migrationInfo.Version));
-                migrationInfos.Add(migrationInfo.Version, migrationInfo);
+                                                                        migrationInfo.ComplexVersion));
+                migrationInfos.Add(migrationInfo);
+                versions.Add(migrationInfo.ComplexVersion);
+
             }
 
             return migrationInfos;

@@ -85,7 +85,7 @@ namespace FluentMigrator.Runner
 
             foreach (var pair in migrations)
             {
-                ApplyMigrationUp(pair.Value, useAutomaticTransactionManagement && pair.Value.TransactionBehavior == TransactionBehavior.Default);
+                ApplyMigrationUp(pair, useAutomaticTransactionManagement && pair.TransactionBehavior == TransactionBehavior.Default);
             }
 
             ApplyProfiles();
@@ -115,13 +115,13 @@ namespace FluentMigrator.Runner
             var migrations = MigrationLoader.LoadMigrations();
 
             return from pair in migrations 
-                   where IsMigrationStepNeededForUpMigration(pair.Key, version) 
-                   select pair.Value;
+                   where IsMigrationStepNeededForUpMigration(pair, version) 
+                   select pair;
         }
 
-        private bool IsMigrationStepNeededForUpMigration(long versionOfMigration, long targetVersion)
+        private bool IsMigrationStepNeededForUpMigration(IMigrationInfo versionOfMigration, long targetVersion)
         {
-            if (versionOfMigration <= targetVersion && !VersionLoader.VersionInfo.HasAppliedMigration(versionOfMigration))
+            if (versionOfMigration.Version <= targetVersion && !VersionLoader.VersionInfo.HasAppliedMigration(versionOfMigration))
             {
                 return true;
             }
@@ -151,17 +151,17 @@ namespace FluentMigrator.Runner
             var migrations = MigrationLoader.LoadMigrations();
 
             var migrationsToApply = (from pair in migrations 
-                                     where IsMigrationStepNeededForDownMigration(pair.Key, targetVersion) 
-                                     select pair.Value)
+                                     where IsMigrationStepNeededForDownMigration(pair, targetVersion) 
+                                     select pair)
                                      .ToList();
 
             return migrationsToApply.OrderByDescending(x => x.Version);
         }
 
 
-        private bool IsMigrationStepNeededForDownMigration(long versionOfMigration, long targetVersion)
+        private bool IsMigrationStepNeededForDownMigration(IMigrationInfo migrationInfo, long targetVersion)
         {
-            if (versionOfMigration > targetVersion && VersionLoader.VersionInfo.HasAppliedMigration(versionOfMigration))
+            if (migrationInfo.Version > targetVersion && VersionLoader.VersionInfo.HasAppliedMigration(migrationInfo))
             {
                 return true;
             }
@@ -177,7 +177,7 @@ namespace FluentMigrator.Runner
                 _alreadyOutputPreviewOnlyModeWarning = true;
             }
 
-            if (!VersionLoader.VersionInfo.HasAppliedMigration(migrationInfo.Version))
+            if (!VersionLoader.VersionInfo.HasAppliedMigration(migrationInfo))
             {
                 var name = GetMigrationName(migrationInfo);
                 _announcer.Heading(string.Format("{0} migrating", name));
@@ -246,8 +246,7 @@ namespace FluentMigrator.Runner
 
             foreach (long version in VersionLoader.VersionInfo.AppliedMigrations())
             {
-                IMigrationInfo migrationInfo;
-                if (availableMigrations.TryGetValue(version, out migrationInfo)) migrationsToRollback.Add(migrationInfo);
+                if (availableMigrations.Any(x => x.Version == version)) migrationsToRollback.Add(availableMigrations.First(x => x.Version == version));
             }
 
             foreach (IMigrationInfo migrationInfo in migrationsToRollback.Take(steps))
@@ -273,8 +272,7 @@ namespace FluentMigrator.Runner
 
             foreach (long appliedVersion in VersionLoader.VersionInfo.AppliedMigrations())
             {
-                IMigrationInfo migrationInfo;
-                if (availableMigrations.TryGetValue(appliedVersion, out migrationInfo)) migrationsToRollback.Add(migrationInfo);
+                if (availableMigrations.Any(x => x.Version == appliedVersion)) migrationsToRollback.Add(availableMigrations.First(x => x.Version == appliedVersion));
             }
 
             foreach (IMigrationInfo migrationInfo in migrationsToRollback)
@@ -472,7 +470,7 @@ namespace FluentMigrator.Runner
 
         public void ValidateVersionOrder()
         {
-            var unappliedVersions = MigrationLoader.LoadMigrations().Where(kvp => MigrationVersionLessThanGreatestAppliedMigration(kvp.Key)).ToList();
+            var unappliedVersions = MigrationLoader.LoadMigrations().Where(kvp => MigrationVersionLessThanGreatestAppliedMigration(kvp)).ToList();
             if (unappliedVersions.Any())
                 throw new VersionOrderInvalidException(unappliedVersions);
 
@@ -486,10 +484,10 @@ namespace FluentMigrator.Runner
 
             _announcer.Heading("Migrations");
 
-            foreach(KeyValuePair<long, IMigrationInfo> migration in MigrationLoader.LoadMigrations())
+            foreach(IMigrationInfo migration in MigrationLoader.LoadMigrations())
             {
-                string migrationName = GetMigrationName(migration.Value);
-                bool isCurrent = migration.Key == currentVersion;
+                string migrationName = GetMigrationName(migration);
+                bool isCurrent = migration.Version == currentVersion;
                 string message = string.Format("{0}{1}",
                                                 migrationName,
                                                 isCurrent ? " (current)" : string.Empty);
@@ -501,9 +499,9 @@ namespace FluentMigrator.Runner
             }
         }
 
-        private bool MigrationVersionLessThanGreatestAppliedMigration(long version)
+        private bool MigrationVersionLessThanGreatestAppliedMigration(IMigrationInfo migrationInfo)
         {
-            return !VersionLoader.VersionInfo.HasAppliedMigration(version) && version < VersionLoader.VersionInfo.Latest();
+            return VersionLoader.VersionInfo.HasAppliedMigration(migrationInfo);
         }
     }
 }

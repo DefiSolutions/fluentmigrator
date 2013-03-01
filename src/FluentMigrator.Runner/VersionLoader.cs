@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using FluentMigrator.Expressions;
+using FluentMigrator.Infrastructure;
 using FluentMigrator.Model;
 using FluentMigrator.Runner.Versioning;
 using FluentMigrator.VersionTableInfo;
@@ -137,7 +138,7 @@ namespace FluentMigrator.Runner
             
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                _versionInfo.AddAppliedMigration(long.Parse(row[0].ToString()));
+                _versionInfo.AddAppliedMigration(new MigrationInfo(long.Parse(row[0].ToString()), row[1].ToString(), TransactionBehavior.Default, new VersionMigration(null)));
             }
         }
 

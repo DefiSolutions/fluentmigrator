@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FluentMigrator.Infrastructure;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Versioning;
 
@@ -17,7 +18,7 @@ namespace FluentMigrator.Tests.Unit
             this.versionTableMetaData = versionTableMetaData;
             this.Runner = runner;
             this.VersionInfo = new VersionInfo();
-            this.Versions = new List<long>();
+            this.Versions = new SortedList<long, IMigrationInfo>();
         }
 
         public bool AlreadyCreatedVersionSchema { get; set; }
@@ -40,7 +41,7 @@ namespace FluentMigrator.Tests.Unit
 
             foreach (var version in Versions)
             {
-                this.VersionInfo.AddAppliedMigration(version);
+                this.VersionInfo.AddAppliedMigration(version.Value);
             }
 
             this.DidLoadVersionInfoGetCalled = true;
@@ -59,7 +60,7 @@ namespace FluentMigrator.Tests.Unit
 
         public void UpdateVersionInfo(long version)
         {
-            this.Versions.Add(version);
+            this.Versions.Add(version, new MigrationInfo(version, TransactionBehavior.Default, new VersionMigration(null)));
 
             this.DidUpdateVersionInfoGetCalled = true;
         }
@@ -73,6 +74,6 @@ namespace FluentMigrator.Tests.Unit
             get { return versionTableMetaData; }
         }
 
-        public List<long> Versions { get; private set; }
+        public SortedList<long, IMigrationInfo> Versions { get; private set; }
     }
 }

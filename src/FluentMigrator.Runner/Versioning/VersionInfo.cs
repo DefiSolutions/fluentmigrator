@@ -18,31 +18,35 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using FluentMigrator.Infrastructure;
 
 namespace FluentMigrator.Runner.Versioning
 {
-    public class VersionInfo : FluentMigrator.Runner.Versioning.IVersionInfo
+    public class VersionInfo : IVersionInfo
     {
-        private IList<long> _versionsApplied = new List<long>();
+        private IList<IMigrationInfo> _versionsApplied = new List<IMigrationInfo>();
+        private IList<string> complexVersionsApplied = new List<string>();
 
         public long Latest()
         {
-            return _versionsApplied.OrderByDescending(x => x).FirstOrDefault();
+            var max = _versionsApplied.Any() ? _versionsApplied.Max(x => x.Version) : 0;
+            return max;
         }
 
-        public void AddAppliedMigration(long migration)
+        public void AddAppliedMigration(IMigrationInfo migration)
         {
             _versionsApplied.Add(migration);
+            complexVersionsApplied.Add(migration.ComplexVersion);
         }
 
-        public bool HasAppliedMigration(long migration)
+        public bool HasAppliedMigration(IMigrationInfo migration)
         {
-            return _versionsApplied.Contains(migration);
+            return complexVersionsApplied.Contains(migration.ComplexVersion);
         }
 
         public IEnumerable<long> AppliedMigrations()
         {
-            return _versionsApplied.OrderByDescending(x => x).AsEnumerable();
+            return _versionsApplied.OrderByDescending(x => x.Version).Select(x => x.Version).AsEnumerable();
         }
     }
 }

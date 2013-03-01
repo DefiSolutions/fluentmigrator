@@ -38,6 +38,7 @@ using FluentMigrator.Runner.Processors.MySql;
 using FluentMigrator.Runner.Processors.Postgres;
 using FluentMigrator.Runner.Processors.Sqlite;
 using FluentMigrator.Runner.Processors.SqlServer;
+using FluentMigrator.Runner.Versioning;
 using FluentMigrator.Tests.Integration.Migrations;
 using FluentMigrator.Tests.Integration.Migrations.Tagged;
 using FluentMigrator.Tests.Unit;
@@ -54,6 +55,11 @@ namespace FluentMigrator.Tests.Integration
     public class MigrationRunnerTests : IntegrationTestBase
     {
         private IRunnerContext _runnerContext;
+
+        private IMigrationInfo CreateMigrationFor(long version, string versionName = null)
+        {
+            return new MigrationInfo(version, versionName, TransactionBehavior.Default, new VersionMigration(null));
+        }
 
         [SetUp]
         public void SetUp()
@@ -385,10 +391,10 @@ namespace FluentMigrator.Tests.Integration
 
                 runner.MigrateUp(false);
 
-                runner.VersionLoader.VersionInfo.HasAppliedMigration(1).ShouldBeTrue();
-                runner.VersionLoader.VersionInfo.HasAppliedMigration(2).ShouldBeTrue();
-                runner.VersionLoader.VersionInfo.HasAppliedMigration(3).ShouldBeTrue();
-                runner.VersionLoader.VersionInfo.HasAppliedMigration(4).ShouldBeTrue();
+                runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(1)).ShouldBeTrue();
+                runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(2)).ShouldBeTrue();
+                runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(3)).ShouldBeTrue();
+                runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(4)).ShouldBeTrue();
                 runner.VersionLoader.VersionInfo.Latest().ShouldBe(4);
 
                 runner.RollbackToVersion(0, false);
@@ -405,7 +411,7 @@ namespace FluentMigrator.Tests.Integration
                 {
                     runner.MigrateUp(1, false);
 
-                    runner.VersionLoader.VersionInfo.HasAppliedMigration(1).ShouldBeTrue();
+                    runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(1)).ShouldBeTrue();
                     processor.TableExists(null, "Users").ShouldBeTrue();
                 }
                 finally
@@ -426,12 +432,12 @@ namespace FluentMigrator.Tests.Integration
 
                     runner.MigrateUp(1, false);
 
-                    runner.VersionLoader.VersionInfo.HasAppliedMigration(1).ShouldBeTrue();
+                    runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(1)).ShouldBeTrue();
                     processor.TableExists(null, "Users").ShouldBeTrue();
 
                     MigrationRunner testRunner = SetupMigrationRunner(processor);
                     testRunner.MigrateDown(0, false);
-                    testRunner.VersionLoader.VersionInfo.HasAppliedMigration(1).ShouldBeFalse();
+                    testRunner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(1)).ShouldBeFalse();
                     processor.TableExists(null, "Users").ShouldBeFalse();
                 }, false, typeof(SqliteProcessor));
             }
@@ -753,8 +759,8 @@ namespace FluentMigrator.Tests.Integration
 
             caughtException.InvalidMigrations.Count().ShouldBe(1);
             var keyValuePair = caughtException.InvalidMigrations.First();
-            keyValuePair.Key.ShouldBe(200909060935);
-            keyValuePair.Value.Migration.ShouldBeOfType<UserEmail>();
+            keyValuePair.Version.ShouldBe(200909060935);
+            keyValuePair.Migration.ShouldBeOfType<UserEmail>();
         }
 
         [Test]

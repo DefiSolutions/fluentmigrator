@@ -1,10 +1,12 @@
-﻿namespace FluentMigrator.Runner.Versioning
+﻿using FluentMigrator.Infrastructure;
+
+namespace FluentMigrator.Runner.Versioning
 {
     public interface IVersionInfo
     {
-        void AddAppliedMigration(long migration);
+        void AddAppliedMigration(IMigrationInfo migrationInfo);
         System.Collections.Generic.IEnumerable<long> AppliedMigrations();
-        bool HasAppliedMigration(long migration);
+        bool HasAppliedMigration(IMigrationInfo migrationInfo);
         long Latest();
     }
 }

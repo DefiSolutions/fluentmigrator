@@ -7,11 +7,11 @@ namespace FluentMigrator.Runner
 {
     public class VersionOrderInvalidException : Exception
     {
-        public IEnumerable<KeyValuePair<long, IMigrationInfo>> InvalidMigrations { get; set; }
+        public IEnumerable<IMigrationInfo> InvalidMigrations { get; set; }
 
         public IEnumerable<long> InvalidVersions { get; private set; }
 
-        public VersionOrderInvalidException(IEnumerable<KeyValuePair<long, IMigrationInfo>> invalidMigrations)
+        public VersionOrderInvalidException(IEnumerable<IMigrationInfo> invalidMigrations)
         {
             InvalidMigrations = invalidMigrations;
         }
@@ -24,7 +24,7 @@ namespace FluentMigrator.Runner
 
                 foreach (var pair in InvalidMigrations)
                 {
-                    result = result + string.Format("{0}{1} - {2}", Environment.NewLine, pair.Key, pair.Value.Migration.GetType().Name);
+                    result = result + string.Format("{0}{1} - {2}", Environment.NewLine, pair.Version, pair.Migration.GetType().Name);
                 }
 
                 return result;

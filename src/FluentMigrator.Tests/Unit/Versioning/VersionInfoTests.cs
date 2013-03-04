@@ -43,8 +43,9 @@ namespace FluentMigrator.Tests.Unit.Versioning
 		[Test]
 		public void CanAddAppliedMigration()
 		{
-            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953));
-            _versionInfo.HasAppliedMigration(CreateMigrationFor(200909060953)).ShouldBeTrue();
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953, "123"));
+            _versionInfo.HasAppliedMigration(CreateMigrationFor(200909060953)).ShouldBeFalse();
+            _versionInfo.HasAppliedMigration(CreateMigrationFor(200909060953, "123")).ShouldBeTrue();
 		}
 
 		[Test]
@@ -52,7 +53,16 @@ namespace FluentMigrator.Tests.Unit.Versioning
 		{
             _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953));
             _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060935));
-			_versionInfo.Latest().ShouldBe(200909060953);
+            _versionInfo.Latest().ShouldBe("0000000200909060953-0");
+		}
+
+		[Test]
+		public void CanGetLatestMigrationWithFeature()
+		{
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953, "123"));
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953, "789"));
+            _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953, "456"));
+            _versionInfo.Latest().ShouldBe("0000000200909060953-789");
 		}
 
 		[Test]
@@ -61,8 +71,8 @@ namespace FluentMigrator.Tests.Unit.Versioning
             _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060953));
             _versionInfo.AddAppliedMigration(CreateMigrationFor(200909060935));
 			var applied = _versionInfo.AppliedMigrations().ToList();
-			applied[0].ShouldBe(200909060953);
-			applied[1].ShouldBe(200909060935);
+            applied[0].ShouldBe("0000000200909060953-0");
+            applied[1].ShouldBe("0000000200909060935-0");
 		}
 	}
 }

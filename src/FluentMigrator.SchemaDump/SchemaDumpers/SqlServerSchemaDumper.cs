@@ -84,7 +84,7 @@ namespace FluentMigrator.SchemaDump.SchemaDumpers
         protected virtual IList<FluentMigrator.Model.TableDefinition> ReadTables()
         {
             string query = @"SELECT OBJECT_SCHEMA_NAME(t.[object_id],DB_ID()) AS [Schema], t.name AS [Table], 
-                c.[Name] AS ColumnName,
+                c.[Name] AS VersionColumnName,
                 t.object_id AS [TableID],
                 c.column_id AS [ColumnID],
                 def.definition AS [DefaultValue],
@@ -134,7 +134,7 @@ namespace FluentMigrator.SchemaDump.SchemaDumpers
                 }
                 //find the column
                 List<ColumnDefinition> cmatches = (from c in tableDef.Columns
-                                                   where c.Name == dr["ColumnName"].ToString()
+                                                   where c.Name == dr["VersionColumnName"].ToString()
                                                    select c).ToList();
                 ColumnDefinition colDef = null;
                 if (cmatches.Count > 0) colDef = cmatches[0];
@@ -144,7 +144,7 @@ namespace FluentMigrator.SchemaDump.SchemaDumpers
                     //need to create and add the column
                     tableDef.Columns.Add(new ColumnDefinition()
                     {
-                        Name = dr["ColumnName"].ToString(),
+                        Name = dr["VersionColumnName"].ToString(),
                         CustomType = "", //TODO: set this property
                         DefaultValue = dr.IsNull("DefaultValue") ? "" : dr["DefaultValue"].ToString(),
                         IsForeignKey = dr["IsForeignKey"].ToString() == "1",

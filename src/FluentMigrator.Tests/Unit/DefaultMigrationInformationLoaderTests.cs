@@ -41,7 +41,7 @@ namespace FluentMigrator.Tests.Unit
             var asm = Assembly.GetExecutingAssembly();
             var loader = new DefaultMigrationInformationLoader( conventions, asm, "FluentMigrator.Tests.Integration.Migrations.Interleaved.Pass1", null);
             
-            List<IMigrationInfo> migrationList = loader.LoadMigrations();
+            SortedList<string, IMigrationInfo> migrationList = loader.LoadMigrations();
 
             //if this works, there will be at least one migration class because i've included on in this code file
             var en = migrationList.GetEnumerator();
@@ -60,7 +60,7 @@ namespace FluentMigrator.Tests.Unit
             var loader = new DefaultMigrationInformationLoader(conventions, asm, "FluentMigrator.Tests.Integration.Migrations.Interleaved.Pass1", null);
 
             var migrationList = loader.LoadMigrations();
-            migrationList.Select(x => x.Migration.GetType()).ShouldNotContain(typeof(VersionedMigration));
+            migrationList.Select(x => x.Value.Migration.GetType()).ShouldNotContain(typeof(VersionedMigration));
             migrationList.Count().ShouldBeGreaterThan(0);
         }
 
@@ -90,7 +90,7 @@ namespace FluentMigrator.Tests.Unit
             };
 
             var migrationList = loader.LoadMigrations();
-            List<Type> actual = migrationList.Select(m => m.Migration.GetType()).ToList();
+            List<Type> actual = migrationList.Select(m => m.Value.Migration.GetType()).ToList();
 
             CollectionAssert.AreEquivalent(expected, actual);
         }
@@ -108,7 +108,7 @@ namespace FluentMigrator.Tests.Unit
             };
 
             var migrationList = loader.LoadMigrations();
-            List<Type> actual = migrationList.Select(m => m.Migration.GetType()).ToList();
+            List<Type> actual = migrationList.Select(m => m.Value.Migration.GetType()).ToList();
 
             CollectionAssert.AreEquivalent(expected, actual);
         }
@@ -130,7 +130,7 @@ namespace FluentMigrator.Tests.Unit
 
             var expected = new List<Type> { typeof(UntaggedMigration), migrationType };
 
-            var actual = loader.LoadMigrations().Select(m => m.Migration.GetType()).ToList();
+            var actual = loader.LoadMigrations().Select(m => m.Value.Migration.GetType()).ToList();
 
             CollectionAssert.AreEquivalent(expected, actual);
         }
@@ -152,7 +152,7 @@ namespace FluentMigrator.Tests.Unit
 
             var expected = new List<Type> { typeof(UntaggedMigration) };
 
-            var actual = loader.LoadMigrations().Select(m => m.Migration.GetType()).ToList();
+            var actual = loader.LoadMigrations().Select(m => m.Value.Migration.GetType()).ToList();
 
             CollectionAssert.AreEquivalent(expected, actual);
         }
@@ -199,13 +199,13 @@ namespace FluentMigrator.Tests.Unit
 
             list.Count().ShouldBe(2);
             
-            list[0].Migration.GetType().ShouldBe(typeof(DoesHandleTransactionLessMigrations.MigrationThatIsTransactionLess));
-            list[0].TransactionBehavior.ShouldBe(TransactionBehavior.None);
-            list[0].Version.ShouldBe(1);
+            list[0].Value.Migration.GetType().ShouldBe(typeof(DoesHandleTransactionLessMigrations.MigrationThatIsTransactionLess));
+            list[0].Value.TransactionBehavior.ShouldBe(TransactionBehavior.None);
+            list[0].Value.Version.ShouldBe(1);
 
-            list[1].Migration.GetType().ShouldBe(typeof(DoesHandleTransactionLessMigrations.MigrationThatIsNotTransactionLess));
-            list[1].TransactionBehavior.ShouldBe(TransactionBehavior.Default);
-            list[1].Version.ShouldBe(2);
+            list[1].Value.Migration.GetType().ShouldBe(typeof(DoesHandleTransactionLessMigrations.MigrationThatIsNotTransactionLess));
+            list[1].Value.TransactionBehavior.ShouldBe(TransactionBehavior.Default);
+            list[1].Value.Version.ShouldBe(2);
         }
     }
 

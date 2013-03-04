@@ -41,10 +41,10 @@ namespace FluentMigrator.Runner
             LoadVersionInfo();
         }
 
-        public void UpdateVersionInfo(long version)
+        public void UpdateVersionInfo(long version, string featureName = null)
         {
             var dataExpression = new InsertDataExpression();
-            dataExpression.Rows.Add(CreateVersionInfoInsertionData(version));
+            dataExpression.Rows.Add(CreateVersionInfoInsertionData(version, featureName));
             dataExpression.TableName = VersionTableMetaData.TableName;
             dataExpression.SchemaName = VersionTableMetaData.SchemaName;
             dataExpression.ExecuteWith(Processor);
@@ -62,11 +62,12 @@ namespace FluentMigrator.Runner
             return (IVersionTableMetaData)Activator.CreateInstance(matchedType);
         }
 
-        protected virtual InsertionDataDefinition CreateVersionInfoInsertionData(long version)
+        protected virtual InsertionDataDefinition CreateVersionInfoInsertionData(long version, string featureName)
         {
             return new InsertionDataDefinition
                        {
-                           new KeyValuePair<string, object>(VersionTableMetaData.ColumnName, version),
+                           new KeyValuePair<string, object>(VersionTableMetaData.VersionColumnName, version),
+                           new KeyValuePair<string, object>(VersionTableMetaData.FeatureColumnName, featureName),
                            new KeyValuePair<string, object>("AppliedOn", DateTime.UtcNow)
                        };
         }
@@ -154,12 +155,13 @@ namespace FluentMigrator.Runner
             }
         }
 
-        public void DeleteVersion(long version)
+        public void DeleteVersion(long version, string featureName = null)
         {
             var expression = new DeleteDataExpression { TableName = VersionTableMetaData.TableName, SchemaName = VersionTableMetaData.SchemaName };
             expression.Rows.Add(new DeletionDataDefinition
                                     {
-                                        new KeyValuePair<string, object>(VersionTableMetaData.ColumnName, version)
+                                        new KeyValuePair<string, object>(VersionTableMetaData.VersionColumnName, version),
+                                        new KeyValuePair<string, object>(VersionTableMetaData.FeatureColumnName, featureName)
                                     });
             expression.ExecuteWith(Processor);
         }

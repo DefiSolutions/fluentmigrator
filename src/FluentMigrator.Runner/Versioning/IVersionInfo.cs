@@ -5,8 +5,8 @@ namespace FluentMigrator.Runner.Versioning
     public interface IVersionInfo
     {
         void AddAppliedMigration(IMigrationInfo migrationInfo);
-        System.Collections.Generic.IEnumerable<long> AppliedMigrations();
+        System.Collections.Generic.IEnumerable<string> AppliedMigrations();
         bool HasAppliedMigration(IMigrationInfo migrationInfo);
-        long Latest();
+        string Latest();
     }
 }

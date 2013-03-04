@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using FluentMigrator.Infrastructure;
 using FluentMigrator.Runner;
 using NUnit.Framework;
@@ -30,8 +31,8 @@ namespace FluentMigrator.Tests.Unit
         {
             var migrations = new[]
                                  {
-                                     new MigrationInfo(1, TransactionBehavior.Default, new TestMigration1()),
-                                     new MigrationInfo(2, TransactionBehavior.Default, new TestMigration2())
+                                     new KeyValuePair<string,IMigrationInfo>("1", new MigrationInfo(1, TransactionBehavior.Default, new TestMigration1())),
+                                     new KeyValuePair<string,IMigrationInfo>("2", new MigrationInfo(2, TransactionBehavior.Default, new TestMigration2())),
                                  };
 
 
@@ -45,8 +46,8 @@ namespace FluentMigrator.Tests.Unit
         {
             var migrations = new[]
                                  {
-                                     new MigrationInfo(1, TransactionBehavior.Default, new TestMigration1()),
-                                     new MigrationInfo(2, TransactionBehavior.Default, new TestMigration2())
+                                     new KeyValuePair<string,IMigrationInfo>("1", new MigrationInfo(1, TransactionBehavior.Default, new TestMigration1())),
+                                     new KeyValuePair<string,IMigrationInfo>("2", new MigrationInfo(2, TransactionBehavior.Default, new TestMigration2())),
                                  };
 
             var exception = new VersionOrderInvalidException(migrations);

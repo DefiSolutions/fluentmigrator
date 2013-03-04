@@ -85,7 +85,7 @@ namespace FluentMigrator.Runner
 
             foreach (var pair in migrations)
             {
-                ApplyMigrationUp(pair, useAutomaticTransactionManagement && pair.TransactionBehavior == TransactionBehavior.Default);
+                ApplyMigrationUp(pair.Value, useAutomaticTransactionManagement && pair.Value.TransactionBehavior == TransactionBehavior.Default);
             }
 
             ApplyProfiles();
@@ -115,8 +115,8 @@ namespace FluentMigrator.Runner
             var migrations = MigrationLoader.LoadMigrations();
 
             return from pair in migrations 
-                   where IsMigrationStepNeededForUpMigration(pair, version) 
-                   select pair;
+                   where IsMigrationStepNeededForUpMigration(pair.Value, version) 
+                   select pair.Value;
         }
 
         private bool IsMigrationStepNeededForUpMigration(IMigrationInfo versionOfMigration, long targetVersion)
@@ -151,11 +151,11 @@ namespace FluentMigrator.Runner
             var migrations = MigrationLoader.LoadMigrations();
 
             var migrationsToApply = (from pair in migrations 
-                                     where IsMigrationStepNeededForDownMigration(pair, targetVersion) 
-                                     select pair)
+                                     where IsMigrationStepNeededForDownMigration(pair.Value, targetVersion) 
+                                     select pair.Value)
                                      .ToList();
 
-            return migrationsToApply.OrderByDescending(x => x.Version);
+            return migrationsToApply.OrderByDescending(x => x.ComplexVersion);
         }
 
 
@@ -189,7 +189,7 @@ namespace FluentMigrator.Runner
                     if (useTransaction) Processor.BeginTransaction();
 
                     ExecuteMigration(migrationInfo.Migration, (m, c) => m.GetUpExpressions(c));
-                    VersionLoader.UpdateVersionInfo(migrationInfo.Version);
+                    VersionLoader.UpdateVersionInfo(migrationInfo.Version, migrationInfo.FeatureName);
 
                     if (useTransaction) Processor.CommitTransaction();
 
@@ -218,7 +218,7 @@ namespace FluentMigrator.Runner
                 if (useTransaction) Processor.BeginTransaction();
                 
                 ExecuteMigration(migrationInfo.Migration, (m, c) => m.GetDownExpressions(c));
-                VersionLoader.DeleteVersion(migrationInfo.Version);
+                VersionLoader.DeleteVersion(migrationInfo.Version, migrationInfo.FeatureName);
 
                 if (useTransaction) Processor.CommitTransaction();
 
@@ -244,9 +244,9 @@ namespace FluentMigrator.Runner
             var availableMigrations = MigrationLoader.LoadMigrations();
             var migrationsToRollback = new List<IMigrationInfo>();
 
-            foreach (long version in VersionLoader.VersionInfo.AppliedMigrations())
+            foreach (string complexVersion in VersionLoader.VersionInfo.AppliedMigrations())
             {
-                if (availableMigrations.Any(x => x.Version == version)) migrationsToRollback.Add(availableMigrations.First(x => x.Version == version));
+                if (availableMigrations.Any(x => x.Value.ComplexVersion == complexVersion)) migrationsToRollback.Add(availableMigrations.First(x => x.Value.ComplexVersion == complexVersion).Value);
             }
 
             foreach (IMigrationInfo migrationInfo in migrationsToRollback.Take(steps))
@@ -270,9 +270,9 @@ namespace FluentMigrator.Runner
             var availableMigrations = MigrationLoader.LoadMigrations();
             var migrationsToRollback = new List<IMigrationInfo>();
 
-            foreach (long appliedVersion in VersionLoader.VersionInfo.AppliedMigrations())
+            foreach (string appliedComplexVersion in VersionLoader.VersionInfo.AppliedMigrations())
             {
-                if (availableMigrations.Any(x => x.Version == appliedVersion)) migrationsToRollback.Add(availableMigrations.First(x => x.Version == appliedVersion));
+                if (availableMigrations.Any(x => x.Value.ComplexVersion == appliedComplexVersion)) migrationsToRollback.Add(availableMigrations.First(x => x.Value.ComplexVersion == appliedComplexVersion).Value);
             }
 
             foreach (IMigrationInfo migrationInfo in migrationsToRollback)
@@ -304,7 +304,7 @@ namespace FluentMigrator.Runner
         {
             if (migration == null) throw new ArgumentNullException("migration");
 
-            return string.Format("{0}: {1}", migration.Version, migration.Migration.GetType().Name);
+            return string.Format("{0}: {1}", migration.ComplexVersion, migration.Migration.GetType().Name);
         }
 
         public void Up(IMigration migration)
@@ -470,7 +470,7 @@ namespace FluentMigrator.Runner
 
         public void ValidateVersionOrder()
         {
-            var unappliedVersions = MigrationLoader.LoadMigrations().Where(kvp => MigrationVersionLessThanGreatestAppliedMigration(kvp)).ToList();
+            var unappliedVersions = MigrationLoader.LoadMigrations().Where(kvp => MigrationVersionLessThanGreatestAppliedMigration(kvp.Value)).ToList();
             if (unappliedVersions.Any())
                 throw new VersionOrderInvalidException(unappliedVersions);
 
@@ -480,14 +480,14 @@ namespace FluentMigrator.Runner
         public void ListMigrations()
         {
             IVersionInfo currentVersionInfo = this.VersionLoader.VersionInfo;
-            long currentVersion = currentVersionInfo.Latest();
+            string currentVersion = currentVersionInfo.Latest();
 
             _announcer.Heading("Migrations");
 
-            foreach(IMigrationInfo migration in MigrationLoader.LoadMigrations())
+            foreach(var migration in MigrationLoader.LoadMigrations())
             {
-                string migrationName = GetMigrationName(migration);
-                bool isCurrent = migration.Version == currentVersion;
+                string migrationName = GetMigrationName(migration.Value);
+                bool isCurrent = migration.Value.ComplexVersion == currentVersion;
                 string message = string.Format("{0}{1}",
                                                 migrationName,
                                                 isCurrent ? " (current)" : string.Empty);

@@ -70,9 +70,13 @@ namespace FluentMigrator.Tests.Unit
                                                                        && expression.TableName == loader.VersionTableMetaData.TableName
                                                                        && expression.Rows.All(
                                                                            definition =>
-                                                                           definition.All(
+                                                                           definition.Count == 2
+                                                                           && definition.Count(
                                                                                pair =>
-                                                                               pair.Key == loader.VersionTableMetaData.ColumnName && pair.Value.Equals(1L))))))
+                                                                               pair.Key == loader.VersionTableMetaData.VersionColumnName && pair.Value.Equals(1L)) == 1
+                                                                           && definition.Count(
+                                                                               pair =>
+                                                                               pair.Key == loader.VersionTableMetaData.FeatureColumnName && pair.Value == null) == 1))))
                 .Verifiable();
 
             loader.DeleteVersion(1);
@@ -125,7 +129,7 @@ namespace FluentMigrator.Tests.Unit
                                                                            definition =>
                                                                            definition.Any(
                                                                                pair =>
-                                                                               pair.Key == loader.VersionTableMetaData.ColumnName && pair.Value.Equals(1L))))))
+                                                                               pair.Key == loader.VersionTableMetaData.VersionColumnName && pair.Value.Equals(1L))))))
                 .Verifiable();
 
             loader.UpdateVersionInfo(1);

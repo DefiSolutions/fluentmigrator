@@ -59,7 +59,7 @@ namespace FluentMigrator.Tests.Integration.Processors
             column = new Mock<ColumnDefinition>();
             tableName = "NewTable";
             tableNameThanMustBeEscaped = "123NewTable";
-            columnName = "ColumnName";
+            columnName = "VersionColumnName";
             column.SetupGet(c => c.Name).Returns(columnName);
             column.SetupGet(c => c.IsNullable).Returns(true);
             column.SetupGet(c => c.Type).Returns(DbType.Int32);

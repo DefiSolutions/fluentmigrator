@@ -50,7 +50,7 @@ namespace FluentMigrator.Infrastructure
         {
         }
 
-        public string ComplexVersion { get { return Version + FeatureName; } }
+        public string ComplexVersion { get { return string.Format("{0:0000000000000000000}-{1}", Version, string.IsNullOrEmpty(FeatureName) ? "0" : FeatureName); } }
         public long Version { get; private set; }
         public string FeatureName { get; private set; }
         public TransactionBehavior TransactionBehavior { get; private set; }

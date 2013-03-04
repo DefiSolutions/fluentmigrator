@@ -58,7 +58,7 @@ namespace FluentMigrator.Tests.Unit.Generators
         [Test]
         public void CanHandleAnAlreadyQuotedColumnName()
         {
-            quoter.QuoteColumnName("\"ColumnName\"").ShouldBe("\"ColumnName\"");
+            quoter.QuoteColumnName("\"VersionColumnName\"").ShouldBe("\"VersionColumnName\"");
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace FluentMigrator.Tests.Unit.Generators
         [Test]
         public void CanHandleAnUnQuotedColumnName()
         {
-            quoter.QuoteColumnName("ColumnName").ShouldBe("\"ColumnName\"");
+            quoter.QuoteColumnName("VersionColumnName").ShouldBe("\"VersionColumnName\"");
         }
 
         [Test]

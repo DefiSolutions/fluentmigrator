@@ -27,9 +27,9 @@ namespace FluentMigrator.Runner.Versioning
         private IList<IMigrationInfo> _versionsApplied = new List<IMigrationInfo>();
         private IList<string> complexVersionsApplied = new List<string>();
 
-        public long Latest()
+        public string Latest()
         {
-            var max = _versionsApplied.Any() ? _versionsApplied.Max(x => x.Version) : 0;
+            var max = _versionsApplied.Any() ? _versionsApplied.Max(x => x.ComplexVersion) : "0";
             return max;
         }
 
@@ -44,9 +44,9 @@ namespace FluentMigrator.Runner.Versioning
             return complexVersionsApplied.Contains(migration.ComplexVersion);
         }
 
-        public IEnumerable<long> AppliedMigrations()
+        public IEnumerable<string> AppliedMigrations()
         {
-            return _versionsApplied.OrderByDescending(x => x.Version).Select(x => x.Version).AsEnumerable();
+            return _versionsApplied.OrderByDescending(x => x.ComplexVersion).Select(x => x.ComplexVersion).AsEnumerable();
         }
     }
 }

@@ -395,7 +395,7 @@ namespace FluentMigrator.Tests.Integration
                 runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(2)).ShouldBeTrue();
                 runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(3)).ShouldBeTrue();
                 runner.VersionLoader.VersionInfo.HasAppliedMigration(CreateMigrationFor(4)).ShouldBeTrue();
-                runner.VersionLoader.VersionInfo.Latest().ShouldBe(4);
+                runner.VersionLoader.VersionInfo.Latest().ShouldBe("4-0");
 
                 runner.RollbackToVersion(0, false);
             });
@@ -713,7 +713,7 @@ namespace FluentMigrator.Tests.Integration
             }
         }
 
-        [Test]
+        [Test(Description = "*** This does not apply to Defi implementation since we want to apply even if it is out of order.")]
         public void ValidateVersionOrderShouldThrowExceptionIfUnappliedMigrationVersionIsLessThanLatestAppliedMigration()
         {
 
@@ -759,8 +759,8 @@ namespace FluentMigrator.Tests.Integration
 
             caughtException.InvalidMigrations.Count().ShouldBe(1);
             var keyValuePair = caughtException.InvalidMigrations.First();
-            keyValuePair.Version.ShouldBe(200909060935);
-            keyValuePair.Migration.ShouldBeOfType<UserEmail>();
+            keyValuePair.Value.Version.ShouldBe(200909060935);
+            keyValuePair.Value.Migration.ShouldBeOfType<UserEmail>();
         }
 
         [Test]

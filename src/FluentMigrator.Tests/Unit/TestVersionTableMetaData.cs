@@ -25,7 +25,8 @@ namespace FluentMigrator.Tests.Unit
 	public class TestVersionTableMetaData : IVersionTableMetaData
 	{
 		public const string TABLENAME = "testVersionTableName";
-		public const string COLUMNNAME = "testColumnName";
+		public const string VERSIONCOLUMNNAME = "testColumnName";
+		public const string FEATURECOLUMNNAME = "testFeatureColumnName";
 		public const string UNIQUEINDEXNAME = "testUniqueIndexName";
 
 		public TestVersionTableMetaData()
@@ -40,9 +41,14 @@ namespace FluentMigrator.Tests.Unit
 			get { return TABLENAME; }
 		}
 
-		public string ColumnName
+		public string VersionColumnName
 		{
-			get { return COLUMNNAME; }
+			get { return VERSIONCOLUMNNAME; }
+		}
+
+		public string FeatureColumnName
+		{
+			get { return FEATURECOLUMNNAME; }
 		}
 
 		public string UniqueIndexName

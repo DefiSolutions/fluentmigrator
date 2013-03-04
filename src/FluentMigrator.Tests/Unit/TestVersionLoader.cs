@@ -25,7 +25,7 @@ namespace FluentMigrator.Tests.Unit
 
         public bool AlreadyCreatedVersionTable { get; set; }
 
-        public void DeleteVersion(long version)
+        public void DeleteVersion(long version, string featureName)
         {
             this.Versions.Remove(version);
         }
@@ -58,7 +58,7 @@ namespace FluentMigrator.Tests.Unit
 
         public IMigrationRunner Runner { get; set; }
 
-        public void UpdateVersionInfo(long version)
+        public void UpdateVersionInfo(long version, string featureName)
         {
             this.Versions.Add(version, new MigrationInfo(version, TransactionBehavior.Default, new VersionMigration(null)));
 

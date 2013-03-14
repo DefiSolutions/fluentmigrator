@@ -139,7 +139,7 @@ namespace FluentMigrator.Runner
             
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                _versionInfo.AddAppliedMigration(new MigrationInfo(long.Parse(row[0].ToString()), row[1].ToString(), TransactionBehavior.Default, new VersionMigration(null)));
+                _versionInfo.AddAppliedMigration(new MigrationInfo(long.Parse(row[VersionTableMetaData.VersionColumnName].ToString()), row[VersionTableMetaData.FeatureColumnName].ToString(), TransactionBehavior.Default, new VersionMigration(null)));
             }
         }
 

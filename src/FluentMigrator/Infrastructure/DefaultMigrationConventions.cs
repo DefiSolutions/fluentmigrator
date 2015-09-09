@@ -127,12 +127,12 @@ namespace FluentMigrator.Infrastructure
 
         public static bool TypeHasTags(Type type)
         {
-            return type.GetOneAttribute<TagsAttribute>() != null;
+            return type.GetOneAttribute<TagsAttribute>(true) != null;
         }
 
         public static bool TypeHasMatchingTags(Type type, IEnumerable<string> tagsToMatch)
         {
-            var tags = type.GetAllAttributes<TagsAttribute>().SelectMany(x => x.TagNames).ToArray();
+            var tags = type.GetAllAttributes<TagsAttribute>(true).SelectMany(x => x.TagNames).ToArray();
 
             return tags.Any() && tagsToMatch.All(t => tags.Any(t.Equals));
         }

@@ -173,6 +173,7 @@
     <Compile Include="Integration\Migrations\Tagged\4_TenantAandBTable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Integration\Migrations\Tagged\TenantABaseMigration.cs" />
     <Compile Include="Integration\Migrations\TestEmptyMigration.cs" />
     <Compile Include="Integration\Processors\FirebirdProcessorTests.cs" />
     <Compile Include="Integration\Processors\MySqlProcessorTests.cs" />

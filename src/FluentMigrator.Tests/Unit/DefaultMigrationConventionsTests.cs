@@ -166,6 +166,13 @@ namespace FluentMigrator.Tests.Unit
                 .ShouldBeFalse();
         }
 
+        [Test]
+        public void TypeHasTagsReturnTrueIfBaseTypeDoesHaveTagsAttribute()
+        {
+            DefaultMigrationConventions.TypeHasTags(typeof(ConcretehasTagAttribute))
+                .ShouldBeTrue();
+        }
+
         public class TypeHasMatchingTags
         {
             [Test]
@@ -239,6 +246,14 @@ namespace FluentMigrator.Tests.Unit
                 DefaultMigrationConventions.TypeHasMatchingTags(typeof(TaggedWithBeAndUkAndProductionAndStagingInTwoTagsAttributes), new[] { "UK", "IE" })
                     .ShouldBeFalse();
             }
+
+            [Test]
+            [Category("Tagging")]
+            public void WhenBaseTypeHasTagsThenConcreteTypeReturnsTrue()
+            {
+                DefaultMigrationConventions.TypeHasMatchingTags(typeof(ConcretehasTagAttribute), new[] { "UK" })
+                    .ShouldBeTrue();
+            }
         }
     }
 
@@ -265,6 +280,17 @@ namespace FluentMigrator.Tests.Unit
 
     public class HasNoTagsFake
     {
+    }
+
+    [Tags("UK")]
+    public abstract class BaseHasTagAttribute : Migration
+    { }
+
+    public class ConcretehasTagAttribute : BaseHasTagAttribute
+    {
+        public override void Up() { }
+
+        public override void Down() { }
     }
 
     [Migration(123, TransactionBehavior.None)]
